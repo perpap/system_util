@@ -50,5 +50,5 @@ echo "IOW_UTIL(%),${IOW_UTIL}" >> ${RESULT_DIR}/system.csv
 echo "IDL_UTIL(%),${IDL_UTIL}" >> ${RESULT_DIR}/system.csv
 echo "CPU_UTIL(%),${CPU_UTIL}" >> ${RESULT_DIR}/system.csv
 
-# Extract the statistics about reads and write
-./get_total_volume.sh ${RESULT_DIR}/diskstats-before-* ${RESULT_DIR}/diskstats-after-* ${RESULT_DIR}/iostat-*
+# Extract the statistics of storage devices utilization
+./disk_util.sh ${RESULT_DIR}/diskstats-before-* ${RESULT_DIR}/diskstats-after-* ${RESULT_DIR}/iostat-* ${RESULT_DIR}
