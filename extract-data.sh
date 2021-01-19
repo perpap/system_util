@@ -1,46 +1,54 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# 3 letter
-# W-Workload - {L,R} Load, Run - {A,B,C,D,E,F} Workload type
-# e.g. WLA - Workload Load A
-declare -a arr=("Workload A Load")
-WORKLOAD=(load_a)
-CYCLES_PER_SECOND=76800000000
+# Print error/usage script message
+usage() {
+    echo
+    echo "Usage:"
+    echo -n "      $0 [option ...] "
+    echo
+    echo "Options:"
+    echo "      -d  Directory with results"
+    echo "      -h  Show usage"
+    echo
 
-echo
-for element in $(seq 0 $((${#WORKLOAD[@]} - 1))); do
-	OPS=$(grep OVERALL ${WORKLOAD[$element]}/ops.txt | awk '{ print $3 }')
-	OPS2=$(printf "%.1f", "$OPS")
-	OPS="($(sed 's/[eE]+\{0,1\}/*10^/g' <<<"$OPS"))"
+    exit 1
+}
 
-	USR_UTIL=$(grep all ${WORKLOAD[$element]}/mpstat-* | awk '{ print $4 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
-	SYS_UTIL=$(grep all ${WORKLOAD[$element]}/mpstat-* | awk '{ print $6 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
-	IOW_UTIL=$(grep all ${WORKLOAD[$element]}/mpstat-* | awk '{ print $7 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
-	IDL_UTIL=$(grep all ${WORKLOAD[$element]}/mpstat-* | awk '{ print $13 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
+# Check the number of arguments
+if [[ $# -ne 2 ]]; then
+	usage
+    exit 1
+fi
 
-	CPU_UTIL=$(grep all ${WORKLOAD[$element]}/mpstat-* | awk '{ print $13 }' | awk '{ sum += $1; n++ } END { if (n > 0) print 100 - (sum / n); }')
-	echo ${arr[$element]}
-	echo
-	echo ${USR_UTIL} '% User CPU Util'
-	echo ${SYS_UTIL} '% System CPU Util'
-	echo ${IOW_UTIL} '% IO-Wait CPU Util'
-	echo ${IDL_UTIL} '% Idle CPU Util'
-	echo ${OPS2} 'ops/sec'
-	echo ${CPU_UTIL} '% Average CPU Util'
-
-	CPU_UTIL_DIV_100=$(echo "scale=2; $CPU_UTIL/100" | bc)
-	TOTAL_CYCLES_NEEDED=$(echo "scale=2; $CPU_UTIL_DIV_100 * $CYCLES_PER_SECOND" | bc)
-	CYCLES_PER_OP=$(echo "scale=2; $TOTAL_CYCLES_NEEDED / $OPS" | bc)
-
-	echo $CYCLES_PER_OP 'cycles/op (with iowait)'
-
-	CPU_UTIL=$(echo "scale=2; $CPU_UTIL - $IOW_UTIL" | bc)
-	CPU_UTIL_DIV_100=$(echo "scale=2; $CPU_UTIL/100" | bc)
-	TOTAL_CYCLES_NEEDED=$(echo "scale=2; $CPU_UTIL_DIV_100 * $CYCLES_PER_SECOND" | bc)
-	CYCLES_PER_OP=$(echo "scale=2; $TOTAL_CYCLES_NEEDED / $OPS" | bc)
-
-	echo $CYCLES_PER_OP 'cycles/op (without iowait)'
-
-	./get_total_volume.sh ${WORKLOAD[$element]}/diskstats-before-* ${WORKLOAD[$element]}/diskstats-after-*
-	echo
+# Check for the input arguments
+while getopts "d:h" opt
+do
+    case "${opt}" in
+        d)
+            RESULT_DIR="${OPTARG}"
+            ;;
+        h)
+            usage
+            ;;
+        *)
+            usage
+            ;;
+    esac
 done
+
+# Calculate averages for user, systet, iowait, idle and cpu utilization
+USR_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $4 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
+SYS_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $6 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
+IOW_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $7 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
+IDL_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $13 }'| awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
+
+CPU_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $13 }' | awk '{ sum += $1; n++ } END { if (n > 0) print 100 - (sum / n); }')
+
+echo "USR_UTIL(%),${USR_UTIL}" > ${RESULT_DIR}/system.csv
+echo "SYS_UTIL(%),${SYS_UTIL}" >> ${RESULT_DIR}/system.csv
+echo "IOW_UTIL(%),${IOW_UTIL}" >> ${RESULT_DIR}/system.csv
+echo "IDL_UTIL(%),${IDL_UTIL}" >> ${RESULT_DIR}/system.csv
+echo "CPU_UTIL(%),${CPU_UTIL}" >> ${RESULT_DIR}/system.csv
+
+# Extract the statistics about reads and write
+./get_total_volume.sh ${RESULT_DIR}/diskstats-before-* ${RESULT_DIR}/diskstats-after-* ${RESULT_DIR}/iostat-*

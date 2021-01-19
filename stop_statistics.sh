@@ -1,15 +1,49 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -x
 
-if [ $# -ne 1 ]; then
-	echo 'Usage:  stop_statistics.sh <result folder>'
-	exit 1
+# Print error/usage script message
+usage() {
+    echo
+    echo "Usage:"
+    echo -n "      $0 [option ...] "
+    echo
+    echo "Options:"
+    echo "      -d  Directory with results"
+    echo "      -h  Show usage"
+    echo
+
+    exit 1
+}
+
+# Check the number of arguments
+if [[ $# -ne 2 ]]; then
+	usage
+    exit 1
 fi
 
-dir_results=$1
+# Check for the input arguments
+while getopts "d:h" opt
+do
+    case "${opt}" in
+        d)
+            RESULT_DIR="${OPTARG}"
+            ;;
+        h)
+            usage
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+# Get the end time of the experiment
 TIME=$(date +"%T-%d-%m-%Y")
-echo $TIME >>${dir_results}/parsedate
+echo $TIME >> ${RESULT_DIR}/parsedate
+
+# Kill iostat mpstat
 killall -9 iostat mpstat
-#ps aux | grep collectl | awk '{print $2}' | xargs kill -15
-cat /proc/diskstats >${dir_results}/diskstats-after-"$TIME" &
+
+# Gett diskstat statistics
+cat /proc/diskstats > ${RESULT_DIR}/diskstats-after-"$TIME" &
