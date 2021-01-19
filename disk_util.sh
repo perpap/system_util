@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Remember to set the debices
-DEVICES=( sdd nvme0n1 )
+DEVICES=( nvme0n1 )
 
 DSTATS_BEFORE=$1
 DSTATS_AFTER=$2
@@ -48,3 +48,6 @@ do
 
 	rm iostat.out.txt
 done
+
+# TODO Change script to plot the statistics for all devices
+./plot_iostat.py -i ${IOSTAT} -o ${RESULT_DIR}/plots -s ${DEVICES[0]}
