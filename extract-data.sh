@@ -51,4 +51,4 @@ echo "IDL_UTIL(%),${IDL_UTIL}" >> ${RESULT_DIR}/system.csv
 echo "CPU_UTIL(%),${CPU_UTIL}" >> ${RESULT_DIR}/system.csv
 
 # Extract the statistics of storage devices utilization
-./disk_util.sh ${RESULT_DIR}/diskstats-before-* ${RESULT_DIR}/diskstats-after-* ${RESULT_DIR}/iostat-* ${RESULT_DIR}
+~/system_util/disk_util.sh ${RESULT_DIR}/diskstats-before-* ${RESULT_DIR}/diskstats-after-* ${RESULT_DIR}/iostat-* ${RESULT_DIR}

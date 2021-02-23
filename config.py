@@ -14,6 +14,7 @@
 ###################################################
 
 fullfigsize  = (13, 2)                      # Full figure size
+fontsize = 11                               # Font size
 
 # Color Blind pallete
 B_color_cycle = ['#3399ff',                # Blue

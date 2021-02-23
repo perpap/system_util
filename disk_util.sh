@@ -50,4 +50,4 @@ do
 done
 
 # TODO Change script to plot the statistics for all devices
-./plot_iostat.py -i ${IOSTAT} -o ${RESULT_DIR}/plots -s ${DEVICES[0]}
+~/system_util/plot_iostat.py -i ${IOSTAT} -o ${RESULT_DIR}/plots -s ${DEVICES[0]}
