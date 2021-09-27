@@ -15,7 +15,7 @@ your application
 ....
 ./stop_statistics.sh -d <directory/with/results>
 
-./extract-data.sh -d <directory/with/results>
+./extract-data.sh -r <directory/with/results> -d <dev1> -d <dev2>
 
 '''
 

@@ -7,25 +7,23 @@ usage() {
     echo -n "      $0 [option ...] "
     echo
     echo "Options:"
-    echo "      -d  Directory with results"
+    echo "      -r  Directory with results"
+    echo "      -d  Devices to monitor"
     echo "      -h  Show usage"
     echo
 
     exit 1
 }
 
-# Check the number of arguments
-if [[ $# -ne 2 ]]; then
-	usage
-    exit 1
-fi
-
 # Check for the input arguments
-while getopts "d:h" opt
+while getopts "r:d:h" opt
 do
     case "${opt}" in
-        d)
+        r)
             RESULT_DIR="${OPTARG}"
+            ;;
+        d)
+			DEVICES+=(-d "${OPTARG}")
             ;;
         h)
             usage
@@ -51,4 +49,9 @@ echo "IDL_UTIL(%),${IDL_UTIL}" >> ${RESULT_DIR}/system.csv
 echo "CPU_UTIL(%),${CPU_UTIL}" >> ${RESULT_DIR}/system.csv
 
 # Extract the statistics of storage devices utilization
-~/system_util/disk_util.sh ${RESULT_DIR}/diskstats-before-* ${RESULT_DIR}/diskstats-after-* ${RESULT_DIR}/iostat-* ${RESULT_DIR}
+~/system_util/disk_util.sh \
+	-b ${RESULT_DIR}/diskstats-before-* \
+	-a ${RESULT_DIR}/diskstats-after-* \
+	-s ${RESULT_DIR}/iostat-* \
+	-r ${RESULT_DIR} \
+	${DEVICES[@]}

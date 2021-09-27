@@ -1,12 +1,35 @@
 #!/usr/bin/env bash
 
 # Remember to set the debices
-DEVICES=( nvme0n1 )
+DEVICES=( nvme2n1p1 )
 
-DSTATS_BEFORE=$1
-DSTATS_AFTER=$2
-IOSTAT=$3
-RESULT_DIR=$4
+# Check for the input arguments
+while getopts "b:a:s:r:d:h" opt
+do
+    case "${opt}" in
+        b)
+            DSTATS_BEFORE="${OPTARG}"
+            ;;
+        a)
+            DSTATS_AFTER="${OPTARG}"
+            ;;
+        s)
+            IOSTAT="${OPTARG}"
+            ;;
+        r)
+            RESULT_DIR="${OPTARG}"
+            ;;
+        d)
+			DEVICES+=("${OPTARG}")
+            ;;
+        h)
+            usage
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
 
 for dev in "${DEVICES[@]}"
 do
