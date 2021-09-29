@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Remember to set the debices
-DEVICES=( nvme2n1p1 )
+#DEVICES=( nvme2n1p1 )
 
 # Check for the input arguments
 while getopts "b:a:s:r:d:h" opt
@@ -33,24 +33,27 @@ done
 
 for dev in "${DEVICES[@]}"
 do
-	R_SEC_BEFORE=$(expr ${R_SEC_BEFORE} + $(grep $dev ${DSTATS_BEFORE} | awk '{ print $6 }'))
-	W_SEC_BEFORE=$(expr ${W_SEC_BEFORE} + $(grep $dev ${DSTATS_BEFORE} | awk '{ print $10 }'))
+	echo $dev
+	R_SEC_BEFORE=$(grep $dev ${DSTATS_BEFORE} | awk '{ print $6 }')
+	W_SEC_BEFORE=$(grep $dev ${DSTATS_BEFORE} | awk '{ print $10 }')
 
-	R_SEC_AFTER=$(expr ${R_SEC_AFTER} + $(grep $dev ${DSTATS_AFTER} | awk '{ print $6 }'))
-	W_SEC_AFTER=$(expr ${W_SEC_AFTER} + $(grep $dev ${DSTATS_AFTER} | awk '{ print $10 }'))
+	R_SEC_AFTER=$(grep $dev ${DSTATS_AFTER} | awk '{ print $6 }')
+	W_SEC_AFTER=$(grep $dev ${DSTATS_AFTER} | awk '{ print $10 }')
+
+	DIFF_SEC_READ=$(expr ${R_SEC_AFTER} - ${R_SEC_BEFORE})
+	DIFF_SEC_WRITE=$(expr ${W_SEC_AFTER} - ${W_SEC_BEFORE})
+
+	DIFF_BYTES_READ=$(expr ${DIFF_SEC_READ} \* 512)
+	DIFF_BYTES_WRITE=$(expr ${DIFF_SEC_WRITE} \* 512)
+
+	DIFF_GB_READ=$(expr ${DIFF_BYTES_READ} / 1024 / 1024 / 1024)
+	DIFF_GB_WRITE=$(expr ${DIFF_BYTES_WRITE} / 1024 / 1024 / 1024)
+
+	echo "${dev},TOTAL_READS(GB),${DIFF_GB_READ}" >> ${RESULT_DIR}/diskstat.csv
+	echo "${dev},TOTAL_WRITES(GB),${DIFF_GB_WRITE}" >> ${RESULT_DIR}/diskstat.csv
+	# Add two blank lines
+	echo "," >> ${RESULT_DIR}/diskstat.csv
 done
-
-DIFF_SEC_READ=$(expr ${R_SEC_AFTER} - ${R_SEC_BEFORE})
-DIFF_SEC_WRITE=$(expr ${W_SEC_AFTER} - ${W_SEC_BEFORE})
-
-DIFF_BYTES_READ=$(expr ${DIFF_SEC_READ} \* 512)
-DIFF_BYTES_WRITE=$(expr ${DIFF_SEC_WRITE} \* 512)
-
-DIFF_GB_READ=$(expr ${DIFF_BYTES_READ} / 1024 / 1024 / 1024)
-DIFF_GB_WRITE=$(expr ${DIFF_BYTES_WRITE} / 1024 / 1024 / 1024)
-
-echo "TOTAL_READS(GB),${DIFF_GB_READ}" > ${RESULT_DIR}/diskstat.csv
-echo "TOTAL_WRITES(GB),${DIFF_GB_WRITE}" >> ${RESULT_DIR}/diskstat.csv
 
 for dev in "${DEVICES[@]}"
 do
@@ -67,7 +70,7 @@ do
 	echo "${dev},AVGRQ-SZ,${AVG_RQ_SZ}" >> ${RESULT_DIR}/diskstat.csv
 	echo "${dev},AVGQU-SZ,${AVG_QU_SZ}" >> ${RESULT_DIR}/diskstat.csv
 	echo "${dev},DEV_UTIL,${DEV_UTIL}"  >> ${RESULT_DIR}/diskstat.csv
-	echo
+	echo "," >> ${RESULT_DIR}/diskstat.csv
 
 	rm iostat.out.txt
 done
