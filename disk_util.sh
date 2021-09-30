@@ -57,7 +57,10 @@ done
 
 for dev in "${DEVICES[@]}"
 do
-	cat ${IOSTAT} | grep $dev > iostat.out.txt
+	# remove suffix starting with "p"	
+	RM_SF_DEV_NAME=${dev%p*}
+
+	cat ${IOSTAT} | grep $RM_SF_DEV_NAME > iostat.out.txt
 
 	R_MB_PER_SEC=$(cat iostat.out.txt | awk '{print $6 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
 	W_MB_PER_SEC=$(cat iostat.out.txt | awk '{print $7 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
