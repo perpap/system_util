@@ -33,7 +33,6 @@ done
 
 for dev in "${DEVICES[@]}"
 do
-	echo $dev
 	R_SEC_BEFORE=$(grep $dev ${DSTATS_BEFORE} | awk '{ print $6 }')
 	W_SEC_BEFORE=$(grep $dev ${DSTATS_BEFORE} | awk '{ print $10 }')
 
@@ -46,9 +45,19 @@ do
 	DIFF_BYTES_READ=$(expr ${DIFF_SEC_READ} \* 512)
 	DIFF_BYTES_WRITE=$(expr ${DIFF_SEC_WRITE} \* 512)
 
+	DIFF_KB_READ=$(expr ${DIFF_BYTES_READ} / 1024)
+	DIFF_KB_WRITE=$(expr ${DIFF_BYTES_WRITE} / 1024)
+
+	DIFF_MB_READ=$(expr ${DIFF_BYTES_READ} / 1024 / 1024)
+	DIFF_MB_WRITE=$(expr ${DIFF_BYTES_WRITE} / 1024 / 1024)
+
 	DIFF_GB_READ=$(expr ${DIFF_BYTES_READ} / 1024 / 1024 / 1024)
 	DIFF_GB_WRITE=$(expr ${DIFF_BYTES_WRITE} / 1024 / 1024 / 1024)
 
+	echo "${dev},TOTAL_READS(KB),${DIFF_KB_READ}" >> ${RESULT_DIR}/diskstat.csv
+	echo "${dev},TOTAL_WRITES(KB),${DIFF_KB_WRITE}" >> ${RESULT_DIR}/diskstat.csv
+	echo "${dev},TOTAL_READS(MB),${DIFF_MB_READ}" >> ${RESULT_DIR}/diskstat.csv
+	echo "${dev},TOTAL_WRITES(MB),${DIFF_MB_WRITE}" >> ${RESULT_DIR}/diskstat.csv
 	echo "${dev},TOTAL_READS(GB),${DIFF_GB_READ}" >> ${RESULT_DIR}/diskstat.csv
 	echo "${dev},TOTAL_WRITES(GB),${DIFF_GB_WRITE}" >> ${RESULT_DIR}/diskstat.csv
 	# Add two blank lines

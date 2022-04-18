@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -x
-
 # Print error/usage script message
 usage() {
     echo
