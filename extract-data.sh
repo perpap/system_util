@@ -35,12 +35,22 @@ do
 done
 
 # Calculate averages for user, systet, iowait, idle and cpu utilization
-USR_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $4 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
-SYS_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $6 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
-IOW_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $7 }' | awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
-IDL_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $13 }'| awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
+USR_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $4 }' \
+	| grep -v "0,00" | awk -F ',' '{print $1"."$2}' \
+	| awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
+SYS_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $6 }' \
+	| grep -v "0,00" | awk -F ',' '{print $1"."$2}' \
+	| awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
+IOW_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $7 }' \
+	| grep -v "0,00" | awk -F ',' '{print $1"."$2}' \
+	| awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
+IDL_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $13 }'\
+	| grep -v "0,00" | awk -F ',' '{print $1"."$2}' \
+	| awk '{ sum += $1; n++ } END { if (n > 0) print (sum / n); }')
 
-CPU_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $13 }' | awk '{ sum += $1; n++ } END { if (n > 0) print 100 - (sum / n); }')
+CPU_UTIL=$(grep all ${RESULT_DIR}/mpstat-* | head -n -1 | awk '{ print $13 }' \
+	| grep -v "0,00" | awk -F ',' '{print $1"."$2}' \
+	| awk '{ sum += $1; n++ } END { if (n > 0) print 100 - (sum / n); }')
 
 echo "USR_UTIL(%),${USR_UTIL}" > ${RESULT_DIR}/system.csv
 echo "SYS_UTIL(%),${SYS_UTIL}" >> ${RESULT_DIR}/system.csv
