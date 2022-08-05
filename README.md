@@ -5,13 +5,18 @@ metrics.
 
 ## Prerequisites
 You need to install python3 and matplotlib
+```
+sudo yum install python3
+sudo yum install python3-pip
+pip3 install matplotlib
+```
 
 ## Configure
 Before run set in disk_util.sh file the devices that you want to get metrics by
 setting DEVICES variable.
 
 ## How to Run
-'''
+```
 ./start_statistics.sh -d <directory/with/results>
 ....
 your application
@@ -20,7 +25,7 @@ your application
 
 ./extract-data.sh -r <directory/with/results> -d <dev1> -d <dev2>
 
-'''
+```
 
 ##TODO:
 Add a configuration file
