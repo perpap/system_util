@@ -8,6 +8,10 @@
 # the cpu_values array uses concatenated indices instead but
 # this looks cleaner than separating with commas. On sith machines
 # awk is a symlink to gawk so this should not be an issue
+
+# To setup a number of interval entries to skip run
+# with option -v skip_intervals=<num_to_skip>, otherwise
+# no intervals are skipped
 BEGIN {
 	# Set your appropriate CPUs
 	# here. CPU indices not set
@@ -21,18 +25,44 @@ BEGIN {
 	for (cpu in valid_cpus) 
 		printf(" %d ", cpu);
 	printf("}\n");
+	# Measure parsed interval samples
+	# by counting the "all" lines. This
+	# way we can skip as many interval samples
+	# as necessary to avoid parsing utilization stats
+	# from the initialization phase of a workload.
+	#
+	# The easy case (a.k.a. what I do): have mpstat
+	# (and iostat) collect stats at 1-second intervals,
+	# thus the number of intervals to skip matches the
+	# duration in seconds of the initialization phase.
+	intervals_parsed = 0;
 }
 # Skip header line (Linux ...)
 FNR == 1 { next; }
 {
-	# Ignore per entry header line, cumulative line, empty line after
-	# per CPU lines
-	if ($0 ~ "CPU" || $0 ~ "all" || NF == 0)
+	# Ignore per entry header line and empty line after
+	# the per CPU lines for a single interval	
+	if ($0 ~ "CPU" || NF == 0)
 		next;
+
+	# Skip the cumulative stats line
+	# but count the interval in order
+	# to check whether we parse the actual
+	# per CPU lines afterwards
+	if ($0 ~ "all") {
+		intervals_parsed++;
+		next;
+	}
+
+	# We're still skipping
+	if (intervals_passed < skip_intervals)
+		next;
+
 	# Check if CPU index for this line belongs
 	# to the set we are monitoring
 	if (!($3 in valid_cpus))
 		next;
+
 	# Record rolling averages. It would be faster to
 	# just get the sum and do the average per cpu in
 	# the end but I don't want to risk overflow for long
