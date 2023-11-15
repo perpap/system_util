@@ -55,7 +55,7 @@ FNR == 1 { next; }
 	}
 
 	# We're still skipping
-	if (intervals_passed < skip_intervals)
+	if (intervals_parsed < skip_intervals)
 		next;
 
 	# Check if CPU index for this line belongs
