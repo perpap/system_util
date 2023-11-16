@@ -31,6 +31,8 @@ BEGIN {
 	if( $0 !~ DEVICE || intervals_parsed < skip_intervals)
 		next
 	
+	rd_traffic_mb += ($6 / 1024.0)
+	wr_traffic_mb += ($7 / 1024.0)
 	avg_rthrough = ($6 + samples * avg_rthrough) / (samples + 1);
 	avg_wthrough = ($7 + samples * avg_wthrough) / (samples + 1);
 	avg_reqsz = ($8 + samples * avg_reqsz) / (samples + 1);
@@ -43,6 +45,8 @@ END {
 	# Careful here, if you run iostat with an option like -m
 	# output units for read/write throughput may be different than
 	# KB/s
+	printf("Read Traffic (GBs)             %.3f\n", rd_traffic_mb / 1024.0);
+	printf("Write Traffic (GBs)            %.3f\n", wr_traffic_mb / 1024.0);
 	printf("Read Throughput (KB/s)         %.3f\n", avg_rthrough);
 	printf("Write Throughput (KB/s)        %.3f\n", avg_wthrough);
 	printf("Average Request Size (Sectors) %.3f\n", avg_reqsz);
